@@ -1,0 +1,123 @@
+Moody <- read.csv("MOODY-2019.csv")
+
+Moody2 <- Moody[-1]
+row.names(Moody2) <- Moody$STUDENTID
+
+Moody2$dummy_on_smartphone[Moody$ON_SMARTPHONE == "always"] <- "4"
+Moody2$dummy_on_smartphone[Moody$ON_SMARTPHONE == "frequently"] <- "3"
+Moody2$dummy_on_smartphone[Moody$ON_SMARTPHONE == "rarely"] <- "2"
+Moody2$dummy_on_smartphone[Moody$ON_SMARTPHONE == "never"] <- "1"
+Moody2$dummy_on_smartphone <- factor(Moody2$dummy_on_smartphone)
+
+Moody2$dummy_grade[Moody$GRADE == "A"] <- "5"
+Moody2$dummy_grade[Moody$GRADE == "B"] <- "4"
+Moody2$dummy_grade[Moody$GRADE == "C"] <- "3"
+Moody2$dummy_grade[Moody$GRADE == "D"] <- "2"
+Moody2$dummy_grade[Moody$GRADE == "F"] <- "1"
+Moody2$dummy_grade <- factor(Moody2$dummy_grade)
+
+Moody2$dummy_asks_questions[Moody$ASKS_QUESTIONS == "always"] <- "3"
+Moody2$dummy_asks_questions[Moody$ASKS_QUESTIONS == "sometimes"] <- "2"
+Moody2$dummy_asks_questions[Moody$ASKS_QUESTIONS == "never"] <- "1"
+Moody2$dummy_asks_questions <- factor(Moody2$dummy_asks_questions)
+
+Moody2$dummy_leaves_early[Moody$LEAVES_EARLY == "always"] <- "3"
+Moody2$dummy_leaves_early[Moody$LEAVES_EARLY == "rarely"] <- "2"
+Moody2$dummy_leaves_early[Moody$LEAVES_EARLY == "never"] <- "1"
+Moody2$dummy_leaves_early <- factor(Moody2$dummy_leaves_early)
+
+Moody2$dummy_late_to_class[Moody$LATE_IN_CLASS == "Yes"] <- "3"
+Moody2$dummy_late_to_class[Moody$LATE_IN_CLASS == "Sometimes"] <- "2"
+Moody2$dummy_late_to_class[Moody$LATE_IN_CLASS == "Never"] <- "1"
+Moody2$dummy_late_to_class <- factor(Moody2$dummy_late_to_class)
+
+Moody2 <- Moody2[order(-Moody2[,1], Moody2[,7], Moody2[,8], Moody2[,9], Moody2[,10], Moody2[,11]),]
+
+for(i in 1:nrow(Moody2)) {
+  n <- 0    
+  if (Moody2[i,7] == 1){
+    n <- 1
+  }
+  Moody2$smartphone1[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,7] == 2){
+    n <- 1
+  }
+  Moody2$smartphone2[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,7] == 3){
+    n <- 1
+  }
+  Moody2$smartphone3[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,9] == 1){
+    n <- 1
+  }
+  Moody2$question1[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,9] == 2){
+    n <- 1
+  }
+  Moody2$question2[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,9] == 3){
+    n <- 1
+  }
+  Moody2$question3[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,10] == 1){
+    n <- 1
+  }
+  Moody2$leaves1[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,10] == 2){
+    n <- 1
+  }
+  Moody2$leaves2[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,10] == 3){
+    n <- 1
+  }
+  Moody2$leaves3[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,11] == 1){
+    n <- 1
+  }
+  Moody2$late1[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,11] == 2){
+    n <- 1
+  }
+  Moody2$late2[i] <- n
+  
+  n <- 0    
+  if (Moody2[i,11] == 3){
+    n <- 1
+  }
+  Moody2$late3[i] <- n
+  
+}
+
+fit <- lm(as.numeric(Moody2$dummy_grade) ~ Moody2$SCORE + Moody2$smartphone1 + Moody2$smartphone2 + Moody2$smartphone3 + Moody2$question1 + Moody2$question2 + Moody2$question3 + Moody2$leaves1 + Moody2$leaves2 + Moody2$leaves3 + Moody2$late1 + Moody2$late2 + Moody2$late3)
+
+summary(fit)
+
+library(ggplot2)
+
+ggplot(Moody2, aes(GRADE, SCORE, colour = ON_SMARTPHONE)) + geom_point(position = position_dodge(width = 0.4)) + ggtitle("On Smartphone")
+
+ggplot(Moody2, aes(GRADE, SCORE, colour = LATE_IN_CLASS)) + geom_point(position = position_dodge(width = 0.4)) + ggtitle("Late In Class")
+
+ggplot(Moody2, aes(GRADE, SCORE, colour = ASKS_QUESTIONS)) + geom_point(position = position_dodge(width = 0.4)) + ggtitle("Asks Questions")
+
+ggplot(Moody2, aes(GRADE, SCORE, colour = LEAVES_EARLY)) + geom_point(position = position_dodge(width = 0.4)) + ggtitle("Leaves Early")

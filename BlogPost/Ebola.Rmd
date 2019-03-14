@@ -1,0 +1,89 @@
+---
+title: "Data 101 Blog"
+name: Revanth Korrapolu
+---
+
+
+Install library "Biostrings" to help parse the .fasta file, which contains the protein sequences
+```{r}
+source("https://bioconductor.org/biocLite.R")
+biocLite("Biostrings")
+library("Biostrings")
+install.packages("pracma")
+library("pracma")
+```
+
+Extract protein sequences from .fasta file
+```{r}
+seqs = readDNAStringSet("Data/ebola_VP35_4.fasta")
+Proteins <- c()
+for (i in strsplit(toString(seqs), ", ")) { Proteins<-c(Proteins,i) }
+```
+
+insert data into a Hamming Distance matrix and plot a mosaic plot
+```{r}
+matrix <- c()
+for (i in Proteins[2:11]){
+  row <- c()
+  for (j in Proteins[2:11]){
+    val <- mapply(adist,i,j)[[1]]
+    row <- append(row,val)
+  }
+  matrix <- c(matrix,row)
+} 
+
+M <- matrix(matrix, 10, 10)
+
+StrainNames <- c("Tai Forest 1","Tai Forest 2","Tai Forest 3","Tai Forest 4","Sudan 1","Zaire Mayinga-76","Bundibugyo 1","Sudan 2","Zaire Kikwit-95", "Bundibugyo 2")
+
+dimnames(M) <- list(StrainNames,StrainNames)
+mosaicplot(M, color=c("blue","green", "red"), main = "Similarity of Zaire ebolavirus Strains",las=2)
+
+```
+
+```{r}
+hc <- hclust(as.dist(M), method = "ward.D2")
+hcd <- as.dendrogram(hc)
+nodePar <- list(lab.cex = 0.6, pch = c(NA, 19), cex = 0.7, col = "blue")
+par(mar=c(5,5,5,6))
+plot(hcd, type = "rectangle", main = "Clustering of Proteins", xlab = "Mutations (# of Amino Acids)", ylab = "Strain Name", horiz = TRUE, nodePar = nodePar)
+```
+
+
+Z test - Random amino acid sequences vs Ebola Virus proteins
+Create two integer lists based on the difference in amino acids between an Ebola Protein 1 vs other Ebola proteins and Ebola Protein 1 vs Random amino acid sequence.
+
+Null Hypothesis: Ebola protein are no similar than any random protein
+
+```{r}
+randomProteins <- c()
+EbolaProteins <- matrix[1:10]
+
+for (i in 1:10){
+  rando <- paste(sample(AA_STANDARD, size=216, replace=TRUE), collapse='' )
+  val <- mapply(adist,Proteins[1],rando)[[1]]
+  randomProteins <- append(randomProteins,val)
+} 
+
+```
+
+```{r}
+sd.random <- sd(randomProteins)
+sd.ebola <- sd(EbolaProteins)
+
+mean.random <- mean(randomProteins)
+mean.ebola <- mean(EbolaProteins)
+
+len.random <- length(randomProteins)
+len.ebola <- length(EbolaProteins)
+
+sd.random.ebola <- sqrt(sd.random^2/len.random + sd.ebola^2/len.ebola)
+zeta <- (mean.random - mean.ebola)/sd.random.ebola
+
+1-pnorm(zeta)
+```
+
+Null Hypothesis rejected
+
+
+

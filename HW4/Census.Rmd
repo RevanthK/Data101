@@ -1,0 +1,14 @@
+---
+title: "Census Data Analytics"
+Name: Revanth Korrapolu (rrk69)
+---
+
+Read Data
+```{r}
+census_data <- read.csv("CENSUSNEW.csv")
+```
+
+
+
+
+
